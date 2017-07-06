@@ -106,7 +106,7 @@ def discriminator(x, y):
     D_h3 = tf.nn.relu(tf.matmul(D_h2, D_W3) + D_b3) # Hidden Layer 2
     D_h4 = tf.nn.relu(tf.matmul(D_h3, D_W4) + D_b4) # Hidden Layer 3
 
-    D_logit = tf.matmul(D_h4, D_W4) + D_b4 # Output Layer
+    D_logit = tf.matmul(D_h4, D_W5) + D_b5 # Output Layer
 
     D_prob = tf.nn.sigmoid(D_logit) # Finding the probability
 
