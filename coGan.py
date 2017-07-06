@@ -103,8 +103,10 @@ def discriminator(x, y):
 
     D_h1 = tf.nn.relu(tf.matmul(inputs, D_W1) + D_b1) # Input Layer
     D_h2 = tf.nn.relu(tf.matmul(D_h1, D_W2) + D_b2) # Hidden Layer 1
-    D_h3 = tf.nn.relu(tf.matmul(D_h2, D_W3) + D_b3) # Hidden Layer 2
-    D_h4 = tf.nn.relu(tf.matmul(D_h3, D_W4) + D_b4) # Hidden Layer 3
+    Drop_1 = tf.nn.dropout(D_h2,0.25)
+    D_h3 = tf.nn.relu(tf.matmul(Drop_1, D_W3) + D_b3) # Hidden Layer 2
+    Drop_2 = tf.nn.dropout(D_h3, 0.25)
+    D_h4 = tf.nn.relu(tf.matmul(Drop_2, D_W4) + D_b4) # Hidden Layer 3
 
     D_logit = tf.matmul(D_h4, D_W5) + D_b5 # Output Layer
 
@@ -139,10 +141,10 @@ def generator(z, y):
 
     G_h1 = tf.nn.relu(tf.matmul(inputs, G_W1) + G_b1)
     G_h2 = tf.nn.relu(tf.matmul(G_h1, G_W2) + G_b2)
-    G_h3 = tf.nn.relu(tf.matmul(G_h2, G_W3) + G_b3)
-    G_h4 = tf.nn.relu(tf.matmul(G_h3, G_W4) + G_b4)
-
-
+    Drop_1 = tf.nn.dropout(G_h2,0.25)
+    G_h3 = tf.nn.relu(tf.matmul(Drop_1, G_W3) + G_b3)
+    Drop_2 = tf.nn.dropout(G_h3, 0.25)
+    G_h4 = tf.nn.relu(tf.matmul(Drop_2, G_W4) + G_b4)
 
     G_log_prob = tf.matmul(G_h4, G_W5) + G_b5
 
