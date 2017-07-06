@@ -34,9 +34,8 @@ def next_batch(num, data, labels):
 
     return np.asarray(data_shuffle), np.asarray(labels_shuffle)
 
-mnist = input_data.read_data_sets('../../MNIST_data', one_hot=True)
 
-xx,yy=dataset_load('./citynamesq.pkl.gz')
+xx,yy=dataset_load('./citynames.pkl.gz')
 
 print(xx[0].shape)
 test=[]
