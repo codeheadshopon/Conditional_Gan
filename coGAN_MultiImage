@@ -101,8 +101,8 @@ y2 = tf.placeholder(tf.float32, shape=[None, y_dim])
 D_W1 = tf.Variable(xavier_init([X_dim, h_dim]))
 D_b1 = tf.Variable(tf.zeros(shape=[h_dim]))
 
-D_W2 = tf.Variable(xavier_init([h_dim, 1]))
-D_b2 = tf.Variable(tf.zeros(shape=[1]))
+D_W2 = tf.Variable(xavier_init([h_dim, 2]))
+D_b2 = tf.Variable(tf.zeros(shape=[2]))
 
 theta_D = [D_W1, D_W2, D_b1, D_b2]
 
@@ -111,10 +111,10 @@ def discriminator(x):
     inputs = x
     # inputs = tf.concat(axis=1, values=[x, y1,y2])
     D_h1 = tf.nn.relu(tf.matmul(inputs, D_W1) + D_b1)
-    D_logit = tf.matmul(D_h1, D_W2) + D_b2
-    D_prob = tf.nn.sigmoid(D_logit)
+    D_logit_1 = tf.matmul(D_h1, D_W2) + D_b2
+    D_prob,D_prob2 = tf.nn.sigmoid(D_logit_1[0]),tf.nn.sigmoid(D_logit_1[1])
 
-    return D_prob, D_logit
+    return D_prob,D_prob2, D_logit_1[0],D_logit_1[1]
 
 
 """ Generator Net model """
@@ -158,15 +158,41 @@ def plot(samples):
     return fig
 
 
-G_sample = generator(Z, y1,y2)
+G_sample = generator(Z, y1, y2)
 
-D_real, D_logit_real = discriminator(X)
-D_fake, D_logit_fake = discriminator(G_sample)
+D_real_1, D_real2, D_logit_real_1,D_logit_real_2 = discriminator(X)
+D_fake_1, D_fake2, D_logit_fake_1,D_logit_fake_2 = discriminator(G_sample)
 
-D_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=D_logit_real, labels=tf.ones_like(D_logit_real)))
-D_loss_fake = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=D_logit_fake, labels=tf.zeros_like(D_logit_fake)))
+
+# D_loss_1 = -tf.reduce_mean(tf.log(D_real_1) + tf.log(1. - D_fake_1))
+# D_loss_2 = -tf.reduce_mean(tf.log(D_real2) + tf.log(1. - D_fake2))
+# D_loss= D_loss_1+D_loss_2
+#
+# G_loss_1 = -tf.reduce_mean(tf.log(D_fake_1))
+# G_loss_2 = -tf.reduce_mean(tf.log(D_fake2))
+# G_loss=G_loss_1+G_loss_2
+
+# #
+
+D_loss_real_1 = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=D_logit_real_1, labels=tf.ones_like(D_logit_real_1)))
+D_loss_real_2 = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=D_logit_real_2, labels=tf.ones_like(D_logit_real_2)))
+
+D_loss_real=D_loss_real_1+D_loss_real_2
+
+
+D_loss_fake_1 = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=D_logit_fake_1, labels=tf.zeros_like(D_logit_fake_1)))
+D_loss_fake_2 = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=D_logit_fake_2, labels=tf.zeros_like(D_logit_fake_2)))
+
+D_loss_fake=D_loss_fake_1+D_loss_fake_2
+
+
 D_loss = D_loss_real + D_loss_fake
-G_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=D_logit_fake, labels=tf.ones_like(D_logit_fake)))
+
+
+G_loss_1 = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=D_logit_fake_1, labels=tf.ones_like(D_logit_fake_1)))
+G_loss_2 = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=D_logit_fake_2, labels=tf.ones_like(D_logit_fake_2)))
+
+G_loss=G_loss_1+G_loss_2
 
 D_solver = tf.train.AdamOptimizer().minimize(D_loss, var_list=theta_D)
 G_solver = tf.train.AdamOptimizer().minimize(G_loss, var_list=theta_G)
